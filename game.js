@@ -266,9 +266,16 @@ mergeSound.volume = 0.5; // Set volume to 50%
 const dropSound = new Audio('drop-sound.wav'); // Replace with your drop sound file path
 dropSound.volume = 0.5; // Set volume to 50%
 
+// Function to start playing background music
+function playBackgroundMusic() {
+    if (isAudioEnabled) {
+        backgroundMusic.play();
+    }
+}
+
 // Set initial audio state
 let isAudioEnabled = true;
-backgroundMusic.play();
+backgroundMusic.oncanplaythrough = playBackgroundMusic;
 document.getElementById('audioToggle').src = 'audio-on.png'; // Change to audio on icon
 
 // Function to toggle audio
@@ -291,10 +298,15 @@ function resetGame() {
     gameOver = false;
     score = 0; // Reset current score to 0
     createNewCreature();
-    if (isAudioEnabled) {
-        backgroundMusic.play(); // Start playing the music
-    }
+    playBackgroundMusic(); // Start playing the music
     update();
 }
 
 document.getElementById('audioToggle').addEventListener('click', toggleAudio);
+
+// Add an event listener to the canvas for the first click
+canvas.addEventListener('click', () => {
+    if (isAudioEnabled) {
+        backgroundMusic.play()
+    }
+});
