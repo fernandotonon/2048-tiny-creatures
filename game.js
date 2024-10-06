@@ -254,7 +254,10 @@ canvas.addEventListener('click', (event) => {
     if (gameOver) {
         resetGame()
     } else {
-        dropCreature();
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = event.clientX - rect.left;
+        const x = Math.max(currentCreature.size / 2, Math.min(mouseX, CANVAS_WIDTH - currentCreature.size / 2));
+        dropCreature(x);
     }
 });
 
