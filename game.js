@@ -4,7 +4,10 @@ const ctx = canvas.getContext('2d');
 // Prevent default touch actions on the canvas
 canvas.addEventListener('touchstart', (event) => {
     event.preventDefault(); // Prevent scrolling and zooming
-    dropCreature(); // Call your drop function or any other interaction
+    const touch = event.touches[0]; // Get the first touch point
+    const rect = canvas.getBoundingClientRect(); // Get the canvas position
+    const x = touch.clientX - rect.left; // Calculate x relative to the canvas
+    dropCreature(x);  // Call your drop function or any other interaction
 }, { passive: false });
 
 canvas.addEventListener('touchmove', (event) => {
@@ -218,8 +221,11 @@ function update() {
     }
 }
 
-function dropCreature() {
+function dropCreature(x) {
     if (currentCreature) {
+        if(x){
+            currentCreature.x = x;
+        }
         currentCreature.vy = 5; // Increased initial downward velocity
         currentCreature.vx = (Math.random() - 0.5) * 4; // Increased random horizontal velocity
         if (isAudioEnabled) {
