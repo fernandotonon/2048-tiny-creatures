@@ -2,18 +2,18 @@ const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
 // Prevent default touch actions
-canvas.addEventListener('touchstart', (event) => {
+/*canvas.addEventListener('touchstart', (event) => {
     event.preventDefault(); // Prevent scrolling and zooming
 }, { passive: false });
-
+*/
 canvas.addEventListener('touchmove', (event) => {
     event.preventDefault(); // Prevent scrolling and zooming
 }, { passive: false });
-
+/*
 canvas.addEventListener('touchend', (event) => {
     event.preventDefault(); // Prevent scrolling and zooming
 }, { passive: false });
-
+*/
 const CANVAS_WIDTH = canvas.width;
 const CANVAS_HEIGHT = canvas.height;
 const CREATURE_SIZES = [10, 20, 40, 80, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300];
