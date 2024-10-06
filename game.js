@@ -5,7 +5,7 @@ const ctx = canvas.getContext('2d');
 /*canvas.addEventListener('touchstart', (event) => {
     event.preventDefault(); // Prevent scrolling and zooming
 }, { passive: false });
-*/
+
 canvas.addEventListener('touchmove', (event) => {
     event.preventDefault(); // Prevent scrolling and zooming
 }, { passive: false });
