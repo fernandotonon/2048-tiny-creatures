@@ -1,6 +1,6 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
-
+let lastDroppedX = 0; // Variable to store the last dropped creature's x position
 // Prevent default touch actions on the canvas
 canvas.addEventListener('touchstart', (event) => {
     event.preventDefault(); // Prevent scrolling and zooming
@@ -172,8 +172,8 @@ class Creature {
 }
 
 function createNewCreature() {
-    const size = Math.random() < 0.5 ? CREATURE_SIZES[0] : CREATURE_SIZES[1];
-    currentCreature = new Creature(CANVAS_WIDTH / 2, 20, size);
+    const size = Math.random() < 0.7 ? CREATURE_SIZES[0] : CREATURE_SIZES[1];
+    currentCreature = new Creature(lastDroppedX, 20, size); // Use lastDroppedX for the new creature's x position
 }
 
 function update() {
@@ -233,6 +233,7 @@ function dropCreature(x) {
             dropSound.play();
         }
         creatures.push(currentCreature);
+        lastDroppedX = currentCreature.x; // Update the last dropped x position
         createNewCreature();
     }
 }
