@@ -176,6 +176,14 @@ function createNewCreature() {
 function update() {
     ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
     
+    // Draw the game over line
+    ctx.strokeStyle = 'red'; // Set the line color to red
+    ctx.lineWidth = 2; // Set the line width
+    ctx.beginPath();
+    ctx.moveTo(0, GAME_OVER_HEIGHT); // Start at the left edge
+    ctx.lineTo(CANVAS_WIDTH, GAME_OVER_HEIGHT); // Draw to the right edge
+    ctx.stroke(); // Render the line
+
     creatures.forEach(creature => {
         creature.update();
         creature.draw();
@@ -188,14 +196,12 @@ function update() {
     if (creatures.some(creature => creature.y - creature.size / 2 <= GAME_OVER_HEIGHT)) {
         gameOver = true;
     }
-
+    
+    if (score > bestScore) {
+        bestScore = score;
+        localStorage.setItem('bestScore', bestScore); // Save new best score
+    }
     if (gameOver) {
-        // Check for best score
-        if (score > bestScore) {
-            bestScore = score;
-            localStorage.setItem('bestScore', bestScore); // Save new best score
-        }
-
         ctx.fillStyle = 'black';
         ctx.font = '30px Arial';
         ctx.fillText('Game Over!', CANVAS_WIDTH / 2 - 70, CANVAS_HEIGHT / 2);
