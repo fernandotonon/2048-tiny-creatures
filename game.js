@@ -232,7 +232,7 @@ canvas.addEventListener('mousemove', (event) => {
 });
 
 canvas.addEventListener('click', (event) => {
-    event.preventDefault();
+//    event.preventDefault();
     if (gameOver) {
         resetGame()
     } else {
@@ -242,7 +242,7 @@ canvas.addEventListener('click', (event) => {
 
 // Keyboard control
 document.addEventListener('keydown', (event) => {
-    event.preventDefault();
+//    event.preventDefault();
     if (!gameOver && currentCreature) {
         switch (event.key) {
             case 'ArrowLeft':
