@@ -1,23 +1,46 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
+// Prevent default touch actions
+canvas.addEventListener('touchstart', (event) => {
+    event.preventDefault(); // Prevent scrolling and zooming
+}, { passive: false });
+
+canvas.addEventListener('touchmove', (event) => {
+    event.preventDefault(); // Prevent scrolling and zooming
+}, { passive: false });
+
+canvas.addEventListener('touchend', (event) => {
+    event.preventDefault(); // Prevent scrolling and zooming
+}, { passive: false });
+
 const CANVAS_WIDTH = canvas.width;
 const CANVAS_HEIGHT = canvas.height;
-const CREATURE_SIZES = [10, 20, 40, 80, 100, 120, 140, 160, 180, 200];
-const COLORS = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#FFD700', '#FFA500', '#FFC0CB', '#9370DB', '#8FBC8F', '#FFB6C1'];
+const CREATURE_SIZES = [10, 20, 40, 80, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300];
+const COLORS = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#FFD700', '#FFA500', '#FFC0CB', '#9370DB', '#8FBC8F', '#FFB6C1', '#FF6347', '#FF4500', '#FF8C00', '#FFA500', '#FFC0CB', '#9370DB', '#8FBC8F', '#FFB6C1', '#FF6347', '#FF4500', '#FF8C00', '#FFA500', '#FFC0CB', '#9370DB', '#8FBC8F', '#FFB6C1', '#FF6347', '#FF4500', '#FF8C00', '#FFA500', '#FFC0CB', '#9370DB', '#8FBC8F', '#FFB6C1'];
 const GAME_OVER_HEIGHT = 0;
 
 let creatures = [];
 let gameOver = false;
 let currentCreature = null;
+let bestScore = localStorage.getItem('bestScore') ? parseInt(localStorage.getItem('bestScore')) : 0;
 let score = 0;
+
+// Load sprite images
+const creatureSprites = [];
+
+CREATURE_SIZES.forEach((size, index) => {
+    const sprite = new Image();
+    sprite.src = `creature${index + 1}.png`; // Replace with your sprite image paths
+    creatureSprites.push(sprite);
+});
 
 class Creature {
     constructor(x, y, size) {
         this.x = x;
         this.y = y;
         this.size = size;
-        this.color = COLORS[CREATURE_SIZES.indexOf(size)];
+        this.spriteIndex = CREATURE_SIZES.indexOf(size); // Get the index for the sprite
         this.vx = 0;
         this.vy = 0;
         this.friction = 0.9; // Increased friction for better control
@@ -26,10 +49,8 @@ class Creature {
     }
 
     draw() {
-        ctx.fillStyle = this.color;
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size / 2, 0, Math.PI * 2);
-        ctx.fill();
+        const sprite = creatureSprites[this.spriteIndex];
+        ctx.drawImage(sprite, this.x - this.size / 2, this.y - this.size / 2, this.size, this.size);
     }
 
     update() {
@@ -114,6 +135,11 @@ class Creature {
 
                     // Check for merging
                     if (this.size === creature.size && this.size < CREATURE_SIZES[CREATURE_SIZES.length - 1]) {
+                        // Play merge sound
+                        if (isAudioEnabled) {
+                            mergeSound.currentTime = 0; // Reset sound to start
+                            mergeSound.play();
+                        }
                         const newSize = CREATURE_SIZES[CREATURE_SIZES.indexOf(this.size) + 1];
                         const newX = (this.x * this.mass + creature.x * creature.mass) / (this.mass + creature.mass);
                         const newY = (this.y * this.mass + creature.y * creature.mass) / (this.mass + creature.mass);
@@ -161,15 +187,23 @@ function update() {
     }
 
     if (gameOver) {
+        // Check for best score
+        if (score > bestScore) {
+            bestScore = score;
+            localStorage.setItem('bestScore', bestScore); // Save new best score
+        }
+
         ctx.fillStyle = 'black';
         ctx.font = '30px Arial';
         ctx.fillText('Game Over!', CANVAS_WIDTH / 2 - 70, CANVAS_HEIGHT / 2);
         ctx.fillText(`Final Score: ${score}`, CANVAS_WIDTH / 2 - 80, CANVAS_HEIGHT / 2 + 40);
+        ctx.fillText(`Best Score: ${bestScore}`, CANVAS_WIDTH / 2 - 80, CANVAS_HEIGHT / 2 + 80);
     } else {
         // Display the current score
         ctx.fillStyle = 'black';
         ctx.font = '20px Arial';
         ctx.fillText(`Score: ${score}`, 10, 30);
+        ctx.fillText(`Best Score: ${bestScore}`, 10, 60); // Display best score
         
         requestAnimationFrame(update);
     }
@@ -177,7 +211,12 @@ function update() {
 
 function dropCreature() {
     if (currentCreature) {
-        currentCreature.falling = true;
+        currentCreature.vy = 5; // Increased initial downward velocity
+        currentCreature.vx = (Math.random() - 0.5) * 4; // Increased random horizontal velocity
+        if (isAudioEnabled) {
+            dropSound.currentTime = 0; // Reset sound to start
+            dropSound.play();
+        }
         creatures.push(currentCreature);
         createNewCreature();
     }
@@ -192,12 +231,10 @@ canvas.addEventListener('mousemove', (event) => {
     }
 });
 
-canvas.addEventListener('click', () => {
+canvas.addEventListener('click', (event) => {
+    event.preventDefault();
     if (gameOver) {
-        creatures = [];
-        gameOver = false;
-        createNewCreature();
-        update();
+        resetGame()
     } else {
         dropCreature();
     }
@@ -205,6 +242,7 @@ canvas.addEventListener('click', () => {
 
 // Keyboard control
 document.addEventListener('keydown', (event) => {
+    event.preventDefault();
     if (!gameOver && currentCreature) {
         switch (event.key) {
             case 'ArrowLeft':
@@ -220,5 +258,43 @@ document.addEventListener('keydown', (event) => {
     }
 });
 
+// Load audio files
+const backgroundMusic = new Audio('background-music.mp3'); // Replace with your music file path
+backgroundMusic.loop = true; // Set the music to loop
+const mergeSound = new Audio('merge-sound.wav'); // Replace with your merge sound file path
+mergeSound.volume = 0.5; // Set volume to 50%
+const dropSound = new Audio('drop-sound.wav'); // Replace with your drop sound file path
+dropSound.volume = 0.5; // Set volume to 50%
+
+// Set initial audio state
+let isAudioEnabled = true;
+backgroundMusic.play();
+document.getElementById('audioToggle').src = 'audio-on.png'; // Change to audio on icon
+
+// Function to toggle audio
+function toggleAudio() {
+    isAudioEnabled = !isAudioEnabled;
+    if (isAudioEnabled) {
+        backgroundMusic.play();
+        document.getElementById('audioToggle').src = 'audio-on.png'; // Change to audio on icon
+    } else {
+        backgroundMusic.pause();
+        document.getElementById('audioToggle').src = 'audio-off.png'; // Change to audio off icon
+    }
+}
+
 createNewCreature();
 update();
+
+function resetGame() {
+    creatures = [];
+    gameOver = false;
+    score = 0; // Reset current score to 0
+    createNewCreature();
+    if (isAudioEnabled) {
+        backgroundMusic.play(); // Start playing the music
+    }
+    update();
+}
+
+document.getElementById('audioToggle').addEventListener('click', toggleAudio);
